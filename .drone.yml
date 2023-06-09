@@ -1,15 +1,30 @@
 kind: pipeline
-type: docker
+name: build-and-test
 
-name: default
+trigger:
+  event:
+    - push
+    - pull_request
 
 steps:
   - name: install-dependencies
     image: python:3.9
     commands:
       - pip install -r requirements.txt
-  - name: flake8
+
+  - name: lint
     image: python:3.9
     commands:
       - pip install flake8
-      - flake8
+      - flake8 .
+
+  - name: integration-tests
+    image: python:3.9
+    commands:
+      - pytest tests/integration
+      
+  - name: unit-tests
+    image: python:3.9
+    commands:
+      - python -m unittest discover -s tests -p "*_test.py"
+  
